@@ -15,17 +15,29 @@ do
         INSTANCE_TYPE="t2.micro"
     fi
 
-    IP_ADDRESS=$(aws ec2 run-instances \
+    # Launch instance and get instance ID
+    INSTANCE_ID=$(aws ec2 run-instances \
         --image-id $AMI \
         --count 1 \
         --instance-type $INSTANCE_TYPE \
         --security-group-ids $SG_ID \
         --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=${i}}]" \
-        --query "Instances[0].PublicIpAddress" \
+        --query "Instances[0].InstanceId" \
         --output text)
+
+    # Wait until the instance has a valid public IP
+    IP_ADDRESS="None"
+    while [ "$IP_ADDRESS" = "None" ]; do
+        sleep 5  # Wait 5 seconds between checks
+        IP_ADDRESS=$(aws ec2 describe-instances \
+            --instance-ids $INSTANCE_ID \
+            --query "Reservations[0].Instances[0].PublicIpAddress" \
+            --output text)
+    done
 
     echo "$i: $IP_ADDRESS"
 
+    # Update Route 53 record
     aws route53 change-resource-record-sets \
     --hosted-zone-id $ZONE_ID \
     --change-batch "{
@@ -36,7 +48,7 @@ do
           \"ResourceRecordSet\": {
             \"Name\": \"$i.$DOMAIN_NAME\",
             \"Type\": \"A\",
-            \"TTL\": 60,
+            \"TTL\": 1,
             \"ResourceRecords\": [
               {
                 \"Value\": \"$IP_ADDRESS\"

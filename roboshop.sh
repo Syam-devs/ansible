@@ -7,7 +7,7 @@ ZONE_ID=Z0068375Z0TI8GQHGWMT
 DOMAIN_NAME=devtechy.fun
 
 for i in "${INSTANCES[@]}"
-DO
+do
     if [ $i == "mongodb" ] || [ $i == "mysql"] || [ $i == "shipping" ]
     then 
         INSTANCE_TYPE="t3.small"

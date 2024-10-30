@@ -3,8 +3,8 @@
 AMI=ami-0b4f379183e5706b9
 SG_ID=sg-0e4b83efbf93fa4e7
 INSTANCE_TYPE=("mongodb" "redis" "mysql" "rabbit" "catalogue" "user" "cart" "shipping" "payment" "dispatch" "web")
-ZONE_ID=
-DOMAIN_NAME=
+ZONE_ID=Z0068375Z0TI8GQHGWMT
+DOMAIN_NAME=devtechy.fun
 
 for i in "${INSTANCES[@]}"
 DO
@@ -26,10 +26,10 @@ aws route53 change-resource-record-sets \
 --change-batch '
 {
     "comment"="Creating a record for cognito endpoint",
-    ,"changes"=[{
+    ,"changes"= [{
     "Action" : "create"
     ,"ResourceRecords" : {
-        "Name" : "'$i','$DOMAIN_NAME'"
+        "Name" : "'$i'.'$DOMAIN_NAME'"
         ,"Type" : "A"
         ,"TTL" : 1
         ,"ResourceRecords" : [{
